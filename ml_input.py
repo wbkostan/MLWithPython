@@ -20,7 +20,10 @@ class MLInputFile:
     def __init__(self, filename):
         self.number_of_records = None
         self.headers = []
-        self.data = {}
+        self.raw_data = {}
+        self.vocabulary = {}
+        self.feature1 = None
+        self.feature2 = None
         if exists(filename):
             self.filename = filename
             self.__extract_data__()
@@ -44,7 +47,7 @@ class MLInputFile:
         self.number_of_records = int(split_N[1])
         split_H = components[1].strip().split('=')
         if not (split_H[1][-1] == ']' and split_H[1][0] == '['):
-            raise InputError(header, "Header lables must be input as an array")
+            raise InputError(header, "Header labels must be input as an array")
         else:
             #strip brackets, remove whitespace, then split on ',' into an array
             self.headers = split_H[1][1:-1].replace(" ", "").split(',')
@@ -53,7 +56,15 @@ class MLInputFile:
         #tab delimited
         components = line.split(chr(9))
         for header, component in zip(self.headers, components):
-            if not header in self.data:
-                self.data[header] = []
-            self.data[header].append(component)
+            if not header in self.raw_data:
+                self.raw_data[header] = []
+            self.raw_data[header].append(component)
 
+    def __vocabularize__(self):
+        for index, cat in enumerate(set(self.raw_data['categoryLabel'])):
+            self.vocabulary[cat] = index
+            self.vocabulary[index] = cat
+
+    def __create_feature_sets__(self):
+        vectorizer = TfidfVectorizer(min_df=2, max_df=10, max_features=10)
+        X = vectorizer.fit_transform(ifile.raw_data['bookTitle']).toarray()
