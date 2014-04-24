@@ -7,8 +7,6 @@ class MLInputFile:
         self.headers = []
         self.raw_data = {}
         self.vocabulary = {}
-        self.feature1 = None
-        self.feature2 = None
         if exists(filename):
             self.filename = filename
             self.__extract_data__()
@@ -49,7 +47,3 @@ class MLInputFile:
         for index, cat in enumerate(set(self.raw_data['categoryLabel'])):
             self.vocabulary[cat] = index
             self.vocabulary[index] = cat
-
-    def __create_feature_sets__(self):
-        vectorizer = TfidfVectorizer(min_df=2, max_df=10, max_features=10)
-        X = vectorizer.fit_transform(ifile.raw_data['bookTitle']).toarray()

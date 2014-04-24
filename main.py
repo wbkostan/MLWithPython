@@ -10,8 +10,10 @@ from ml_feature import MLFeatureSet
 def main():
     ifile = MLInputFile('DataSet.txt')
 
-    data_pool_1 = ifile.raw_data['bookTitle']
-    data_pool_2 = merge_data([ifile.raw_data['bookTitle'], ifile.raw_data['bookAuthor']])
+    #data_pool_1 = ifile.raw_data['bookTitle']
+    #data_pool_2 = merge_data([ifile.raw_data['bookTitle'], ifile.raw_data['bookAuthor']])
+    data_pool_1 = consolidate_data(ifile.raw_data)
+    data_pool_2 = consolidate_data(ifile.raw_data)
     target = ifile.raw_data['categoryLabel']
 
     feature1 = MLFeatureSet(raw_data=data_pool_1, raw_targets=target,
@@ -57,6 +59,15 @@ def merge_data(data_lists):
         for index, entry in enumerate(measurement):
             new_list[index] = new_list[index].strip() + ' ' + entry.strip()
     return new_list
+
+def consolidate_data(data_dict):
+    keys = list(data_dict.keys())
+    keys.remove('categoryLabel')
+    data = data_dict[keys[0]]
+    for key in keys[1:]:
+        data = merge_data([data, data_dict[key]])
+    return data
+
 
 if __name__ == "__main__":
     main()
