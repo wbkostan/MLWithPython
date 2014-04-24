@@ -10,6 +10,8 @@ class MLFeatureSet:
         self.vocabulary = {}
         extractor = fe(**fe_params)
         self.data = extractor.fit_transform(raw_data).toarray()
+        names = extractor.get_feature_names()
+        print(names)
         self.__codify_targets__(raw_targets)
 
     def __codify_targets__(self, raw_targets):

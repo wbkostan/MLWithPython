@@ -34,5 +34,15 @@ def main():
     score = cross_validation.cross_val_score(estimator=lsvc, X=X, y=y, cv=kfold)
     print(score.mean(), score.std())
 
+def merge_string_list(list_o_lists):
+    if(list_o_lists == []):
+        raise ValueError
+    new_list = list_o_lists[0]
+    for list in list_o_lists[:-1]:
+        assert(len(new_list) == len(list))
+        for index, entry in enumerate(new_list, list):
+            new_list[index] = new_list[index].strip() + ' ' + entry.strip()
+    return new_list
+
 if __name__ == "__main__":
     main()
