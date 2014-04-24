@@ -1,46 +1,60 @@
 __author__ = 'Liam Kostan'
 
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn import cross_validation
 from sklearn.svm import LinearSVC
+from sklearn.tree import DecisionTreeClassifier
 from ml_input import MLInputFile
 from ml_feature import MLFeatureSet
 
 def main():
     ifile = MLInputFile('DataSet.txt')
 
-    feature1 = MLFeatureSet(raw_data=ifile.raw_data['bookTitle'], raw_targets=ifile.raw_data['categoryLabel'],
+    data_pool_1 = ifile.raw_data['bookTitle']
+    data_pool_2 = merge_data([ifile.raw_data['bookTitle'], ifile.raw_data['bookAuthor']])
+    target = ifile.raw_data['categoryLabel']
+
+    feature1 = MLFeatureSet(raw_data=data_pool_1, raw_targets=target,
                             fe=TfidfVectorizer, fe_params={'min_df':2, 'max_df':10, 'max_features':50})
-    feature2 = MLFeatureSet(raw_data=ifile.raw_data['bookAuthor'], raw_targets=ifile.raw_data['categoryLabel'],
-                            fe=TfidfVectorizer, fe_params={'min_df':2, 'max_df':10, 'max_features':50})
+    feature2 = MLFeatureSet(raw_data=data_pool_2, raw_targets=target,
+                            fe=CountVectorizer, fe_params={'analyzer':'char_wb','ngram_range':(3,4),'min_df':3, 'max_features':150})
 
     X = feature1.data
     y = feature1.target
 
     #Estimator and Validator components
     lsvc = LinearSVC(multi_class='ovr')
-    kfold = cross_validation.StratifiedKFold(y, 3)
+    dtreec = DecisionTreeClassifier()
+    kfold = cross_validation.StratifiedKFold(y, n_folds=3)
+
 
     score = cross_validation.cross_val_score(estimator=lsvc, X=X, y=y, cv=kfold)
-    print(score.mean(), score.std())
+    print("Linear SVC (FS1):", score.mean(), score.std())
+
+    score = cross_validation.cross_val_score(estimator=dtreec, X=X, y=y, cv=kfold)
+    print("Decision Tree Classifier (FS1):", score.mean(), score.std())
 
     X = feature2.data
     y = feature2.target
 
     #Estimator and Validator components
     lsvc = LinearSVC(multi_class='ovr')
-    kfold = cross_validation.StratifiedKFold(y, 3)
+    dtreec = DecisionTreeClassifier()
+    kfold = cross_validation.StratifiedKFold(y, n_folds=3)
 
     score = cross_validation.cross_val_score(estimator=lsvc, X=X, y=y, cv=kfold)
-    print(score.mean(), score.std())
+    print("Linear SVC (FS2):", score.mean(), score.std())
 
-def merge_string_list(list_o_lists):
-    if(list_o_lists == []):
+    score = cross_validation.cross_val_score(estimator=dtreec, X=X, y=y, cv=kfold)
+    print("Decision Tree Classifier (FS2):", score.mean(), score.std())
+
+def merge_data(data_lists):
+    if(data_lists == []):
         raise ValueError
-    new_list = list_o_lists[0]
-    for list in list_o_lists[:-1]:
-        assert(len(new_list) == len(list))
-        for index, entry in enumerate(new_list, list):
+    new_list = data_lists[0]
+    for measurement in data_lists[1:]:
+        assert(len(new_list) == len(measurement))
+        for index, entry in enumerate(measurement):
             new_list[index] = new_list[index].strip() + ' ' + entry.strip()
     return new_list
 
