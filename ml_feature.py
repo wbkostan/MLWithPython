@@ -8,9 +8,15 @@ class MLFeatureSet:
         self.data = None
         self.target = None
         self.vocabulary = {}
-        extractor = fe(**fe_params)
-        self.data = extractor.fit_transform(raw_data).toarray()
+        self.extractor = fe(**fe_params)
+        self.data = self.extractor.fit_transform(raw_data).toarray()
         self.__codify_targets__(raw_targets)
+
+    def transform(self, raw_data):
+        return self.extractor.transform(raw_data).toarray()
+
+    def format_target(self, raw_targets):
+        return array(raw_targets)
 
     def __codify_targets__(self, raw_targets):
         for index, cat in enumerate(set(raw_targets)):
