@@ -14,20 +14,20 @@ def main():
 
     #data_pool_1 = ifile.raw_data['bookTitle']
     #data_pool_2 = merge_data([ifile.raw_data['bookTitle'], ifile.raw_data['bookAuthor']])
-    #data_pool_1 = consolidate_data(ifile.raw_data)
-    #data_pool_1 = consolidate_data(ifile.raw_data)
-    train_pool_1 = consolidate_data(train_data)
-    train_pool_2 = consolidate_data(train_data)
-    test_pool_1 = consolidate_data(test_data)
-    test_pool_2 = consolidate_data(test_data)
+    data_pool_1 = merge_data([ifile.raw_data['bookTitle']])
+    data_pool_2 = consolidate_data(ifile.raw_data)
+    #train_pool_1 = consolidate_data(train_data)
+    #train_pool_2 = consolidate_data(train_data)
+    #test_pool_1 = consolidate_data(test_data)
+    #test_pool_2 = consolidate_data(test_data)
 
-    feature1 = MLFeatureSet(raw_data=train_pool_1, raw_targets=train_data['categoryLabel'],
+    feature1 = MLFeatureSet(raw_data=data_pool_1, raw_targets=ifile.raw_data['categoryLabel'],
                             fe=TfidfVectorizer, fe_params={'min_df':2, 'max_df':10, 'max_features':50})
-    feature2 = MLFeatureSet(raw_data=train_pool_2, raw_targets=train_data['categoryLabel'],
+    feature2 = MLFeatureSet(raw_data=data_pool_2, raw_targets=ifile.raw_data['categoryLabel'],
                             fe=CountVectorizer, fe_params={'analyzer':'char_wb','ngram_range':(3,4),'min_df':3, 'max_features':150})
 
-    X = feature1.transform(test_pool_1)
-    y = feature1.format_target(test_data['categoryLabel'])
+    X = feature1.data
+    y = feature1.target
 
     #Estimator and Validator components
     lsvc = LinearSVC(multi_class='ovr')
@@ -41,8 +41,8 @@ def main():
     score = cross_validation.cross_val_score(estimator=dtreec, X=X, y=y, cv=kfold)
     print("Decision Tree Classifier (FS1):", score.mean(), score.std())
 
-    X = feature2.transform(test_pool_2)
-    y = feature1.format_target(test_data['categoryLabel'])
+    X = feature2.data
+    y = feature2.target
 
     #Estimator and Validator components
     lsvc = LinearSVC(multi_class='ovr')

@@ -5,12 +5,14 @@ from numpy import array
 
 class MLFeatureSet:
     def __init__(self, raw_data, raw_targets, fe=TfidfVectorizer, fe_params={'min_df':2, 'max_df':10, 'max_features':50}):
-        self.data = None
         self.target = None
         self.vocabulary = {}
         self.extractor = fe(**fe_params)
         self.data = self.extractor.fit_transform(raw_data).toarray()
         self.__codify_targets__(raw_targets)
+
+    def get_feature_names(self):
+        return self.extractor.get_feature_names()
 
     def transform(self, raw_data):
         return self.extractor.transform(raw_data).toarray()
