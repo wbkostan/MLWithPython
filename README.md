@@ -8,6 +8,4 @@ Package Requirements
 
 Built on WinPython 3.3.5.0 for Windows x64
 Known dependencies:
-    Scikit-learn
-    Numpy
-    Scipy
+    Scikit-learn 0.14 (and related dependencies)

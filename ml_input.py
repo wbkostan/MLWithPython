@@ -6,9 +6,15 @@ from math import floor
 class MLInputFile:
     def __init__(self, filename):
         self.number_of_records = None
+        self.category_key = None
         self.headers = []
         self.raw_data = {}
+        self.__headers_sorted_by_length__ = {}
         self.vocabulary = {}
+
+        #Internal flags
+        self.__avged__ = False
+
         if exists(filename):
             self.filename = filename
             self.__extract_data__()
@@ -62,6 +68,7 @@ class MLInputFile:
         else:
             #strip brackets, remove whitespace, then split on ',' into an array
             self.headers = split_H[1][1:-1].replace(" ", "").split(',')
+            self.category_key = self.headers[0]
 
     def __process_line__(self, line):
         #tab delimited
@@ -69,9 +76,29 @@ class MLInputFile:
         for header, component in zip(self.headers, components):
             if not header in self.raw_data:
                 self.raw_data[header] = []
+                self.__headers_sorted_by_length__[header] = 0
             self.raw_data[header].append(component)
+            self.__headers_sorted_by_length__[header] += len(component)
+
+    def get_key_by_length_rank(self, rank):
+        rank -= 1
+        if not self.__avged__:
+            #calculate length averages
+            for key in self.__headers_sorted_by_length__:
+                self.__headers_sorted_by_length__[key] = self.__headers_sorted_by_length__[key]/float(self.number_of_records)
+            self.__avged__ = True
+
+            #Remove category label key and sort by value
+            del(self.__headers_sorted_by_length__[self.category_key])
+            self.__headers_sorted_by_length__ = sorted(self.__headers_sorted_by_length__, key=self.__headers_sorted_by_length__.get, reverse=True)
+
+        #Return
+        if len(self.__headers_sorted_by_length__) >= rank:
+            return self.__headers_sorted_by_length__[-1]
+        else:
+            return self.__headers_sorted_by_length__[rank]
 
     def __vocabularize__(self):
-        for index, cat in enumerate(set(self.raw_data['categoryLabel'])):
+        for index, cat in enumerate(set(self.raw_data[self.category_key])):
             self.vocabulary[cat] = index
             self.vocabulary[index] = cat
