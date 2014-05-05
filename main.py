@@ -9,25 +9,20 @@ from ml_feature import MLFeatureSet
 
 def main():
     ifile = MLInputFile('DataSet.txt')
-    percent_split = 0.4
-    train_data,test_data = ifile.split_data_set(percent_split)
 
-    #data_pool_1 = ifile.raw_data['bookTitle']
-    #data_pool_2 = merge_data([ifile.raw_data['bookTitle'], ifile.raw_data['bookAuthor']])
     data_pool_1 = merge_data([ifile.raw_data['bookTitle']])
     data_pool_2 = consolidate_data(ifile.raw_data)
-    #train_pool_1 = consolidate_data(train_data)
-    #train_pool_2 = consolidate_data(train_data)
-    #test_pool_1 = consolidate_data(test_data)
-    #test_pool_2 = consolidate_data(test_data)
+
+    number_of_records = ifile.number_of_records
 
     feature1 = MLFeatureSet(raw_data=data_pool_1, raw_targets=ifile.raw_data['categoryLabel'],
-                            fe=TfidfVectorizer, fe_params={'min_df':2, 'max_df':10, 'max_features':50})
+                            fe=TfidfVectorizer, fe_params={'min_df':2, 'max_df':number_of_records/10, 'max_features':50})
     feature2 = MLFeatureSet(raw_data=data_pool_2, raw_targets=ifile.raw_data['categoryLabel'],
-                            fe=CountVectorizer, fe_params={'analyzer':'char_wb','ngram_range':(3,4),'min_df':3, 'max_features':150})
+                            fe=CountVectorizer, fe_params={'analyzer':'char_wb','ngram_range':(3,5),'min_df':3, 'max_features':150})
 
     X = feature1.data
     y = feature1.target
+    print(feature1.get_feature_names())
 
     #Estimator and Validator components
     lsvc = LinearSVC(multi_class='ovr')
@@ -43,6 +38,7 @@ def main():
 
     X = feature2.data
     y = feature2.target
+    print(feature2.get_feature_names())
 
     #Estimator and Validator components
     lsvc = LinearSVC(multi_class='ovr')
